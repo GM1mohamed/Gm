@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📸 تحدي الصورة اليومي</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="header-content">
+        <h1>
+          <span class="logo-icon">📸</span>
+          تحدي الصورة
+        </h1>
+        <div id="statsSection" class="stats-section">
+          <div class="stat-item">
+            <span class="stat-icon">👥</span>
+            <span class="stat-value" id="totalParticipants">0</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <div class="challenge-card" id="challengeCard">
+        <div class="card-header">
+          <span class="date-tag" id="dateDisplay"></span>
+          <span class="status-badge">🎯 تحدي اليوم</span>
+        </div>
+        
+        <div class="question-image-container" id="questionImageContainer">
+          <img id="questionImage" src="" alt="سؤال اليوم" class="question-image">
+        </div>
+        
+        <h2 class="question-text" id="questionText"></h2>
+        
+        <div class="participation-form" id="participationForm">
+          <div class="form-group">
+            <label for="participantName">👤 اسمك</label>
+            <input type="text" id="participantName" placeholder="اكتب اسمك للظهور في لوحة المتصدرين" maxlength="30" required>
+            <small class="hint">سيظهر اسمك مع نتيجتك</small>
+          </div>
+          
+          <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+              <input type="file" id="solutionInput" accept="image/*" capture="environment" hidden>
+              <div class="upload-placeholder">
+                <span class="upload-icon">📤</span>
+                <p>اضغط هنا لاختيار صورة حلك</p>
+                <small>يمكنك التقاط صورة أو اختيارها من المعرض</small>
+              </div>
+            </div>
+            
+            <div class="preview-container hidden" id="previewContainer">
+              <img id="previewImage" src="" alt="معاينة الحل">
+              <button class="btn-remove" id="removeImageBtn">✕</button>
+            </div>
+            
+            <div class="upload-status" id="uploadStatus"></div>
+            
+            <button class="btn-primary btn-block" id="submitButton" disabled>
+              <span class="btn-text">🚀 إرسال الحل والمشاركة</span>
+              <span class="loading-spinner hidden" id="submitSpinner"></span>
+            </button>
+          </div>
+        </div>
+        
+        <div class="success-message hidden" id="successMessage">
+          <div class="success-icon">✅</div>
+          <h3>تم استلام حلك!</h3>
+          <p>سيتم مراجعة إجابتك قريباً وتحديث النتيجة</p>
+          <div class="streak-info" id="streakInfo"></div>
+          <button class="btn-primary" id="newParticipationBtn">📝 مشاركة جديدة</button>
+        </div>
+      </div>
+      
+      <aside class="leaderboard-card">
+        <div class="leaderboard-header">
+          <h2>🏆 لوحة المتصدرين</h2>
+          <div class="live-indicator">
+            <span class="live-dot"></span>
+            <span>مباشر</span>
+          </div>
+        </div>
+        
+        <div class="leaderboard-tabs">
+          <button class="tab-btn active" data-tab="today">اليوم</button>
+          <button class="tab-btn" data-tab="all">كل الوقت</button>
+        </div>
+        
+        <div class="leaderboard-list" id="leaderboardList">
+          <div class="loading-placeholder">جاري تحميل المتصدرين...</div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <script type="module" src="script.js"></script>
+</body>
+</html>
