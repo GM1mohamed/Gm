@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMube Edu - قناة الأستاذ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .channel-header {
+            background: var(--surface);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 16px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        
+        .channel-cover {
+            height: 140px;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .channel-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .channel-cover .overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .channel-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 0 20px 20px;
+            margin-top: -40px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .channel-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            border: 3px solid var(--surface);
+            overflow: hidden;
+            flex-shrink: 0;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .channel-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .channel-avatar i {
+            font-size: 36px;
+            color: #fff;
+        }
+        
+        .channel-details {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .channel-details h2 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        
+        .channel-details .subject {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .channel-stats {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .channel-stats span {
+            font-size: 11px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .channel-stats span strong {
+            color: var(--text);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding: 0 4px;
+        }
+        
+        .section-header h3 {
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .sort-btns {
+            display: flex;
+            gap: 4px;
+        }
+        
+        .sort-btn {
+            background: var(--surface2);
+            border: none;
+            color: var(--text-muted);
+            padding: 5px 12px;
+            border-radius: 16px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-size: 11px;
+            transition: var(--transition);
+        }
+        
+        .sort-btn.active {
+            background: var(--primary);
+            color: #fff;
+        }
+        
+        .playlist-scroll {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+            scrollbar-width: none;
+        }
+        
+        .playlist-scroll::-webkit-scrollbar { display: none; }
+        
+        .playlist-card {
+            background: var(--surface);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            min-width: 160px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--text);
+            border: 1px solid rgba(255,255,255,0.04);
+            transition: var(--transition);
+            display: block;
+        }
+        
+        .playlist-card:hover {
+            border-color: rgba(76,175,80,0.2);
+        }
+        
+        .playlist-card i {
+            font-size: 20px;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+        
+        .playlist-card .name {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .playlist-card .count {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        @media (max-width: 768px) {
+            .channel-cover { height: 110px; }
+            .channel-avatar { width: 64px; height: 64px; }
+            .channel-avatar i { font-size: 28px; }
+            .channel-details h2 { font-size: 18px; }
+            .channel-info { padding: 0 14px 14px; margin-top: -32px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="../index.html" class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <span>GMube Edu</span>
+        </a>
+        <div style="display:flex;gap:8px;">
+            <a href="teachers.html" class="btn btn-secondary btn-sm"><i class="fas fa-users"></i> الأساتذة</a>
+            <a href="../index.html" class="btn btn-secondary btn-sm"><i class="fas fa-home"></i> الرئيسية</a>
+        </div>
+    </div>
+
+    <div class="page-container">
+        <div class="channel-header">
+            <div class="channel-cover" id="coverDiv"></div>
+            <div class="channel-info" id="channelInfo"></div>
+        </div>
+
+        <div id="playlistsRow" style="display:none;">
+            <div class="section-header">
+                <h3><i class="fas fa-list" style="color:var(--primary);"></i> قوائم التشغيل</h3>
+            </div>
+            <div class="playlist-scroll" id="playlistsScroll"></div>
+        </div>
+
+        <div class="section-header">
+            <h3><i class="fas fa-video" style="color:var(--primary);"></i> الدروس <span id="videoCount" style="font-size:13px;color:var(--text-muted);font-weight:400;"></span></h3>
+            <div class="sort-btns">
+                <button class="sort-btn active" onclick="sortVideos('newest',this)">الأحدث</button>
+                <button class="sort-btn" onclick="sortVideos('popular',this)">الأكثر مشاهدة</button>
+                <button class="sort-btn" onclick="sortVideos('rating',this)">الأعلى تقييماً</button>
+            </div>
+        </div>
+
+        <div class="videos-grid" id="teacherVideos"></div>
+        <div id="noVideos" class="empty-state" style="display:none;"><i class="fas fa-video-slash"></i><p>لا توجد دروس</p></div>
+    </div>
+
+    <div class="bottom-nav">
+        <a href="../index.html" class="nav-item"><i class="fas fa-home"></i><span>الرئيسية</span></a>
+        <a href="teachers.html" class="nav-item active"><i class="fas fa-users"></i><span>الأساتذة</span></a>
+        <a href="../login.html" class="nav-item" id="accountNav"><i class="fas fa-user"></i><span>حسابي</span></a>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/error-handler.js"></script>
+    <script>
+        var teacher = null;
+        var videos = [];
+        var playlists = [];
+        var session = getSession();
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAccountNav();
+            var id = new URLSearchParams(window.location.search).get('id');
+            if (id) loadChannel(id);
+            else location.href = 'teachers.html';
+        });
+        
+        function updateAccountNav() {
+            if (session) {
+                document.getElementById('accountNav').href = session.type === 'teacher' ? 'teacher.html' : 'profile.html';
+            }
+        }
+        
+        function loadChannel(teacherId) {
+            api('teachers?user_id=eq.' + teacherId).then(function(t) {
+                if (!t || !t.length) return;
+                teacher = t[0];
+                
+                Promise.all([
+                    api('videos?user_id=eq.' + teacherId + '&order=created_at.desc'),
+                    getPlaylists(teacherId)
+                ]).then(function(r) {
+                    videos = r[0] || [];
+                    playlists = r[1] || [];
+                    renderAll();
+                });
+            });
+        }
+        
+        function renderAll() {
+            var coverDiv = document.getElementById('coverDiv');
+            if (teacher.cover) {
+                coverDiv.innerHTML = '<img src="' + teacher.cover + '" alt="" style="width:100%;height:100%;object-fit:cover;" onerror="this.remove();"><div class="overlay"></div>';
+            } else {
+                coverDiv.innerHTML = '<div class="overlay"></div>';
+            }
+            
+            var avatar = teacher.avatar
+                ? '<img src="' + teacher.avatar + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';">' +
+                  '<i class="fas fa-user-circle" style="display:none;"></i>'
+                : '<i class="fas fa-user-circle"></i>';
+            
+            var totalViews = 0, totalLikes = 0;
+            videos.forEach(function(v) { totalViews += v.views || 0; totalLikes += v.likes || 0; });
+            
+            document.getElementById('channelInfo').innerHTML = 
+                '<div class="channel-avatar">' + avatar + '</div>' +
+                '<div class="channel-details">' +
+                    '<h2>' + esc(teacher.name) + '</h2>' +
+                    '<div class="subject"><i class="fas fa-book"></i> ' + esc(teacher.subject) + '</div>' +
+                    '<div class="channel-stats">' +
+                        '<span><i class="fas fa-video"></i> <strong>' + videos.length + '</strong> درس</span>' +
+                        '<span><i class="fas fa-eye"></i> <strong>' + fmt(totalViews) + '</strong> مشاهدة</span>' +
+                        '<span><i class="fas fa-thumbs-up"></i> <strong>' + fmt(totalLikes) + '</strong> إعجاب</span>' +
+                    '</div>' +
+                '</div>';
+            
+            if (playlists.length) {
+                document.getElementById('playlistsRow').style.display = 'block';
+                var ps = document.getElementById('playlistsScroll');
+                ps.innerHTML = '';
+                playlists.forEach(function(p) {
+                    var a = document.createElement('a');
+                    a.className = 'playlist-card';
+                    a.href = 'playlist.html?id=' + p.id;
+                    a.innerHTML = '<i class="fas fa-list"></i><div class="name">' + esc(p.name) + '</div><div class="count">' + (p.video_count||0) + ' فيديو</div>';
+                    ps.appendChild(a);
+                });
+            }
+            
+            renderVideos(videos);
+            document.getElementById('videoCount').textContent = '(' + videos.length + ')';
+        }
+        
+        function renderVideos(list) {
+            var grid = document.getElementById('teacherVideos');
+            var empty = document.getElementById('noVideos');
+            
+            if (!list.length) {
+                grid.innerHTML = '';
+                grid.style.display = 'none';
+                empty.style.display = 'block';
+                return;
+            }
+            
+            grid.style.display = 'grid';
+            empty.style.display = 'none';
+            grid.innerHTML = '';
+            
+            list.forEach(function(v, i) {
+                var card = document.createElement('div');
+                card.className = 'video-card fade-in';
+                card.style.animationDelay = (i * 0.03) + 's';
+                
+                var thumb = v.thumbnail
+                    ? '<img src="' + v.thumbnail + '" alt="" onerror="this.parentElement.style.background=\'linear-gradient(135deg, var(--primary-dark), var(--primary))\';this.style.display=\'none\';">'
+                    : '';
+                
+                card.innerHTML = 
+                    '<div class="video-thumbnail" style="' + (!v.thumbnail ? 'background:linear-gradient(135deg, var(--primary-dark), var(--primary));' : '') + 'display:flex;align-items:center;justify-content:center;">' +
+                        thumb +
+                        (!v.thumbnail ? '<i class="fas fa-play-circle" style="font-size:40px;color:#fff;opacity:0.7;"></i>' : '') +
+                        '<div class="play-overlay"><i class="fas fa-play"></i></div>' +
+                        (v.grade ? '<span class="badge">' + esc(v.grade) + '</span>' : '') +
+                    '</div>' +
+                    '<div class="video-info">' +
+                        '<div class="video-title">' + esc(v.title || 'بدون عنوان') + '</div>' +
+                        '<div class="video-meta">' +
+                            '<span><i class="fas fa-tag"></i> ' + esc(v.category || '') + '</span>' +
+                            '<span><i class="fas fa-eye"></i> ' + fmt(v.views || 0) + '</span>' +
+                        '</div>' +
+                    '</div>';
+                
+                card.onclick = function() { location.href = 'watch.html?id=' + v.id; };
+                grid.appendChild(card);
+            });
+        }
+        
+        function sortVideos(type, btn) {
+            document.querySelectorAll('.sort-btn').forEach(function(b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            
+            var sorted = [].concat(videos);
+            if (type === 'popular') sorted.sort(function(a, b) { return (b.views||0) - (a.views||0); });
+            else if (type === 'rating') sorted.sort(function(a, b) { return (b.avg_rating||0) - (a.avg_rating||0); });
+            else sorted.sort(function(a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+            
+            renderVideos(sorted);
+        }
+        
+        function esc(t) { if (!t) return ''; var d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+        function fmt(n) { if (n >= 1000000) return (n/1000000).toFixed(1) + 'M'; if (n >= 1000) return (n/1000).toFixed(1) + 'K'; return n.toString(); }
+    </script>
+</body>
+</html>
