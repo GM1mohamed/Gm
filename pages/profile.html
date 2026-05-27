@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GMube Edu - حسابي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .profile-header {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .profile-avatar i {
+            font-size: 40px;
+            color: #fff;
+        }
+        
+        .profile-info h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .profile-info .role {
+            font-size: 13px;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+        
+        .profile-info .detail {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+        
+        .profile-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        
+        .stat-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 16px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        
+        .stat-card i {
+            font-size: 24px;
+            color: var(--primary);
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .stat-card .value {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        
+        .stat-card .label {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+        
+        .section-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(255,255,255,0.04);
+        }
+        
+        .section-card h3 {
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .section-card h3 i {
+            color: var(--primary);
+            font-size: 16px;
+        }
+        
+        .saved-video-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        
+        .saved-video-item:hover {
+            background: var(--surface2);
+        }
+        
+        .saved-video-item .thumb {
+            width: 100px;
+            height: 56px;
+            border-radius: 6px;
+            overflow: hidden;
+            flex-shrink: 0;
+            background: var(--surface2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .saved-video-item .thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .saved-video-item .thumb i {
+            font-size: 20px;
+            color: #fff;
+            opacity: 0.6;
+        }
+        
+        .saved-video-item .info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .saved-video-item .title {
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        
+        .saved-video-item .meta {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        .saved-video-item .remove-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+        
+        .saved-video-item .remove-btn:hover {
+            color: var(--danger);
+            background: rgba(239,68,68,0.1);
+        }
+        
+        .comment-history-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            background: var(--surface2);
+        }
+        
+        .comment-history-item .header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+        
+        .comment-history-item .text {
+            font-size: 13px;
+            margin-bottom: 4px;
+        }
+        
+        .comment-history-item .video-link {
+            font-size: 12px;
+            color: var(--primary);
+            cursor: pointer;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-muted);
+        }
+        
+        .empty-state i {
+            font-size: 36px;
+            margin-bottom: 10px;
+            display: block;
+            opacity: 0.4;
+        }
+        
+        @media (max-width: 768px) {
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .profile-avatar {
+                width: 64px;
+                height: 64px;
+            }
+            
+            .profile-avatar i {
+                font-size: 30px;
+            }
+            
+            .profile-info h2 {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <a href="../index.html" class="logo">
+            <i class="fas fa-graduation-cap"></i>
+            <span>GMube Edu</span>
+        </a>
+        <div style="display: flex; gap: 8px;">
+            <a href="../index.html" class="btn btn-secondary btn-sm">
+                <i class="fas fa-home"></i> الرئيسية
+            </a>
+            <button onclick="logout()" class="btn btn-danger btn-sm">
+                <i class="fas fa-sign-out-alt"></i> خروج
+            </button>
+        </div>
+    </div>
+
+    <div class="page-container">
+        <!-- رأس البروفايل -->
+        <div class="profile-header" id="profileHeader">
+            <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></div>
+        </div>
+
+        <!-- إحصائيات -->
+        <div class="profile-stats" id="profileStats"></div>
+
+        <!-- الدروس المحفوظة -->
+        <div class="section-card">
+            <h3><i class="fas fa-bookmark"></i> الدروس المحفوظة</h3>
+            <div id="savedVideos">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></div>
+            </div>
+        </div>
+
+        <!-- تعليقاتي -->
+        <div class="section-card">
+            <h3><i class="fas fa-comments"></i> تعليقاتي</h3>
+            <div id="myComments">
+                <div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>جاري التحميل...</p></div>
+            </div>
+        </div>
+
+        <!-- تغيير الرمز السري -->
+        <div class="section-card">
+            <h3><i class="fas fa-lock"></i> تغيير الرمز السري</h3>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <div class="form-group" style="flex:1;min-width:150px;">
+                    <label>الرمز الحالي</label>
+                    <input type="password" id="currentSecret" placeholder="الرمز الحالي">
+                </div>
+                <div class="form-group" style="flex:1;min-width:150px;">
+                    <label>الرمز الجديد</label>
+                    <input type="password" id="newSecret" placeholder="الرمز الجديد">
+                </div>
+                <div class="form-group" style="flex:1;min-width:150px;">
+                    <label>تأكيد الرمز</label>
+                    <input type="password" id="confirmSecret" placeholder="تأكيد الرمز الجديد">
+                </div>
+            </div>
+            <button class="btn btn-sm" onclick="changeSecret()">
+                <i class="fas fa-save"></i> حفظ التغييرات
+            </button>
+            <div id="secretMsg" style="margin-top:8px;font-size:13px;"></div>
+        </div>
+    </div>
+
+    <!-- شريط التنقل السفلي -->
+    <div class="bottom-nav">
+        <a href="../index.html" class="nav-item">
+            <i class="fas fa-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="teachers.html" class="nav-item">
+            <i class="fas fa-users"></i>
+            <span>الأساتذة</span>
+        </a>
+        <a href="profile.html" class="nav-item active">
+            <i class="fas fa-user"></i>
+            <span>حسابي</span>
+        </a>
+    </div>
+
+    <script src="../js/config.js"></script>
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/error-handler.js"></script>
+    <script>
+        var session = getSession();
+        var userData = null;
+        
+        // التحقق من تسجيل الدخول
+        if (!session) {
+            alert('يرجى تسجيل الدخول أولاً');
+            location.href = '../login.html';
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserData();
+            loadSavedVideos();
+            loadMyComments();
+        });
+        
+        function loadUserData() {
+            var table = session.type === 'teacher' ? 'teachers' : 'students';
+            var endpoint = table + '?user_id=eq.' + session.user_id;
+            
+            api(endpoint).then(function(data) {
+                if (data && data.length > 0) {
+                    userData = data[0];
+                    displayProfileHeader();
+                    displayStats();
+                }
+            }).catch(function(error) {
+                console.error('Error loading user data:', error);
+                document.getElementById('profileHeader').innerHTML = 
+                    '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>فشل تحميل البيانات</p></div>';
+            });
+        }
+        
+        function displayProfileHeader() {
+            var container = document.getElementById('profileHeader');
+            var roleText = session.type === 'teacher' ? 'معلم' : 'طالب';
+            var roleIcon = session.type === 'teacher' ? 'fa-chalkboard-teacher' : 'fa-user-graduate';
+            
+            container.innerHTML = 
+                '<div class="profile-avatar">' +
+                    '<i class="fas ' + roleIcon + '"></i>' +
+                '</div>' +
+                '<div class="profile-info">' +
+                    '<h2>' + esc(session.name) + '</h2>' +
+                    '<div class="role"><i class="fas fa-circle" style="font-size:6px;vertical-align:middle;"></i> ' + roleText + '</div>' +
+                    '<div class="detail">' +
+                        (session.type === 'teacher' 
+                            ? '<i class="fas fa-book"></i> ' + esc(userData.subject || '')
+                            : '<i class="fas fa-graduation-cap"></i> ' + esc(userData.grade || '')) +
+                    '</div>' +
+                '</div>';
+        }
+        
+        function displayStats() {
+            var container = document.getElementById('profileStats');
+            
+            // تحميل إحصائيات المستخدم
+            Promise.all([
+                getVideos('الكل'),
+                api('comments?user_id=eq.' + session.user_id + '&select=id')
+            ]).then(function(results) {
+                var allVideos = results[0] || [];
+                var allComments = results[1] || [];
+                
+                // حساب الفيديوهات التي شاهدها (نستخدم saved كبديل)
+                var savedIds = JSON.parse(localStorage.getItem('saved_videos') || '[]');
+                
+                var totalVideos = allVideos.length;
+                var savedCount = savedIds.length;
+                var commentCount = allComments.length;
+                
+                // للمعلم: حساب فيديوهاته
+                if (session.type === 'teacher') {
+                    var myVideos = allVideos.filter(function(v) { return v.user_id === session.user_id; });
+                    var totalViews = 0;
+                    myVideos.forEach(function(v) { totalViews += (v.views || 0); });
+                    
+                    container.innerHTML = 
+                        '<div class="stat-card"><i class="fas fa-video"></i><div class="value">' + myVideos.length + '</div><div class="label">دروسي</div></div>' +
+                        '<div class="stat-card"><i class="fas fa-eye"></i><div class="value">' + fmt(totalViews) + '</div><div class="label">مشاهدات</div></div>' +
+                        '<div class="stat-card"><i class="fas fa-comment"></i><div class="value">' + commentCount + '</div><div class="label">تعليقاتي</div></div>' +
+                        '<div class="stat-card"><i class="fas fa-bookmark"></i><div class="value">' + savedCount + '</div><div class="label">محفوظات</div></div>';
+                } else {
+                    container.innerHTML = 
+                        '<div class="stat-card"><i class="fas fa-video"></i><div class="value">' + totalVideos + '</div><div class="label">دروس متاحة</div></div>' +
+                        '<div class="stat-card"><i class="fas fa-bookmark"></i><div class="value">' + savedCount + '</div><div class="label">محفوظات</div></div>' +
+                        '<div class="stat-card"><i class="fas fa-comment"></i><div class="value">' + commentCount + '</div><div class="label">تعليقاتي</div></div>' +
+                        '<div class="stat-card"><i class="fas fa-calendar"></i><div class="value">' + fmtDate(userData.created_at) + '</div><div class="label">تاريخ التسجيل</div></div>';
+                }
+            }).catch(function() {
+                container.innerHTML = '';
+            });
+        }
+        
+        function loadSavedVideos() {
+            var container = document.getElementById('savedVideos');
+            var savedIds = JSON.parse(localStorage.getItem('saved_videos') || '[]');
+            
+            if (savedIds.length === 0) {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-bookmark"></i><p>لا توجد دروس محفوظة</p><p style="font-size:12px;">احفظ الدروس لتظهر هنا</p></div>';
+                return;
+            }
+            
+            // تحميل معلومات الفيديوهات المحفوظة
+            var filters = savedIds.map(function(id) { return 'id=eq.' + id; }).join('&or=');
+            
+            api('videos?or=(' + filters + ')').then(function(videos) {
+                if (!videos || videos.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-bookmark"></i><p>لا توجد دروس محفوظة</p></div>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                videos.forEach(function(video) {
+                    var item = document.createElement('div');
+                    item.className = 'saved-video-item';
+                    
+                    var thumb = video.thumbnail
+                        ? '<img src="' + video.thumbnail + '" alt="" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\';">' +
+                          '<i class="fas fa-play" style="display:none;"></i>'
+                        : '<i class="fas fa-play"></i>';
+                    
+                    item.innerHTML = 
+                        '<div class="thumb">' + thumb + '</div>' +
+                        '<div class="info">' +
+                            '<div class="title">' + esc(video.title || 'بدون عنوان') + '</div>' +
+                            '<div class="meta">' +
+                                '<span><i class="fas fa-user-circle"></i> ' + esc(video.user_name || '') + '</span>' +
+                                ' · ' +
+                                '<span><i class="fas fa-eye"></i> ' + (video.views || 0) + '</span>' +
+                            '</div>' +
+                        '</div>' +
+                        '<button class="remove-btn" onclick="event.stopPropagation();removeSaved(' + video.id + ')" title="إزالة من المحفوظات">' +
+                            '<i class="fas fa-times"></i>' +
+                        '</button>';
+                    
+                    item.onclick = function() {
+                        location.href = 'watch.html?id=' + video.id;
+                    };
+                    
+                    container.appendChild(item);
+                });
+            }).catch(function() {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>فشل تحميل المحفوظات</p></div>';
+            });
+        }
+        
+        function loadMyComments() {
+            var container = document.getElementById('myComments');
+            
+            api('comments?user_id=eq.' + session.user_id + '&order=created_at.desc&limit=10').then(function(comments) {
+                if (!comments || comments.length === 0) {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-comment"></i><p>لا توجد تعليقات</p><p style="font-size:12px;">علق على الدروس لتظهر تعليقاتك هنا</p></div>';
+                    return;
+                }
+                
+                container.innerHTML = '';
+                
+                // تحميل عناوين الفيديوهات
+                var videoIds = comments.map(function(c) { return c.video_id; }).filter(function(v, i, a) { return a.indexOf(v) === i; });
+                var filters = videoIds.map(function(id) { return 'id=eq.' + id; }).join('&or=');
+                
+                api('videos?or=(' + filters + ')&select=id,title').then(function(videos) {
+                    var videoMap = {};
+                    if (videos) {
+                        videos.forEach(function(v) { videoMap[v.id] = v.title; });
+                    }
+                    
+                    comments.forEach(function(comment) {
+                        var starsHtml = '';
+                        for (var i = 1; i <= 5; i++) {
+                            starsHtml += '<i class="fas fa-star" style="color:' + (i <= (comment.rating || 0) ? 'var(--warning)' : 'var(--text-muted)') + ';font-size:10px;"></i>';
+                        }
+                        
+                        var item = document.createElement('div');
+                        item.className = 'comment-history-item';
+                        item.innerHTML = 
+                            '<div class="header">' +
+                                '<span>' + starsHtml + '</span>' +
+                                '<span>' + fmtDate(comment.created_at) + '</span>' +
+                            '</div>' +
+                            '<div class="text">' + esc(comment.text) + '</div>' +
+                            '<div class="video-link" onclick="location.href=\'watch.html?id=' + comment.video_id + '\'">' +
+                                '<i class="fas fa-video"></i> ' + esc(videoMap[comment.video_id] || 'الدرس') +
+                            '</div>';
+                        
+                        container.appendChild(item);
+                    });
+                }).catch(function() {
+                    container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>فشل تحميل التعليقات</p></div>';
+                });
+            }).catch(function() {
+                container.innerHTML = '<div class="empty-state"><i class="fas fa-exclamation-triangle"></i><p>فشل تحميل التعليقات</p></div>';
+            });
+        }
+        
+        function removeSaved(videoId) {
+            var savedIds = JSON.parse(localStorage.getItem('saved_videos') || '[]');
+            var index = savedIds.indexOf(videoId);
+            if (index > -1) {
+                savedIds.splice(index, 1);
+                localStorage.setItem('saved_videos', JSON.stringify(savedIds));
+                loadSavedVideos();
+                displayStats();
+            }
+        }
+        
+        function changeSecret() {
+            var currentSecret = document.getElementById('currentSecret').value.trim();
+            var newSecret = document.getElementById('newSecret').value.trim();
+            var confirmSecret = document.getElementById('confirmSecret').value.trim();
+            var msgDiv = document.getElementById('secretMsg');
+            
+            if (!currentSecret || !newSecret || !confirmSecret) {
+                msgDiv.innerHTML = '<span style="color:var(--danger);">يرجى ملء جميع الحقول</span>';
+                return;
+            }
+            
+            if (newSecret !== confirmSecret) {
+                msgDiv.innerHTML = '<span style="color:var(--danger);">الرموز غير متطابقة</span>';
+                return;
+            }
+            
+            if (currentSecret !== userData.secret) {
+                msgDiv.innerHTML = '<span style="color:var(--danger);">الرمز الحالي غير صحيح</span>';
+                return;
+            }
+            
+            var table = session.type === 'teacher' ? 'teachers' : 'students';
+            
+            api(table + '?id=eq.' + userData.id, 'PATCH', { secret: newSecret }).then(function() {
+                msgDiv.innerHTML = '<span style="color:var(--primary);">تم تغيير الرمز السري بنجاح</span>';
+                document.getElementById('currentSecret').value = '';
+                document.getElementById('newSecret').value = '';
+                document.getElementById('confirmSecret').value = '';
+            }).catch(function() {
+                msgDiv.innerHTML = '<span style="color:var(--danger);">فشل تغيير الرمز السري</span>';
+            });
+        }
+        
+        function esc(t) {
+            if (!t) return '';
+            var d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
+        
+        function fmt(n) {
+            if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+            if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+            return n.toString();
+        }
+        
+        function fmtDate(d) {
+            if (!d) return '';
+            try { return new Date(d).toLocaleDateString('ar-EG'); } catch(e) { return ''; }
+        }
+    </script>
+</body>
+</html>
