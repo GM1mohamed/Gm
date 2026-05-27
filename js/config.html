@@ -27,3 +27,22 @@ var SOURCE_TYPES = {
     YOUTUBE: 'youtube',
     TELEGRAM: 'telegram'
 };
+
+// تهيئة عميل Supabase
+var supabase = null;
+
+function initSupabase() {
+    if (typeof supabaseJs !== 'undefined') {
+        supabase = supabaseJs.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
+        console.log('Supabase initialized successfully');
+    } else {
+        console.error('Supabase SDK not loaded');
+    }
+}
+
+// استدعاء التهيئة عند تحميل الصفحة
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initSupabase);
+} else {
+    initSupabase();
+}
