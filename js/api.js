@@ -1,109 +1,67 @@
 // js/api.js
 
-// ========== دوال API الأساسية ==========
-function api(endpoint, method, body) {
-    var headers = {
-        'apikey': SUPABASE_CONFIG.ANON_KEY,
-        'Authorization': 'Bearer ' + SUPABASE_CONFIG.ANON_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=representation'
-    };
-    
-    var options = {
-        method: method || 'GET',
-        headers: headers
-    };
-    
-    if (body && method !== 'DELETE') {
-        options.body = JSON.stringify(body);
-    }
-    
-    if (method === 'DELETE') {
-        delete options.body;
-    }
-    
-    return fetch(SUPABASE_CONFIG.URL + '/rest/v1/' + endpoint, options)
-        .then(function(response) {
-            if (method === 'DELETE') {
-                if (response.ok) return { success: true };
-                return response.text().then(function(text) {
-                    throw new Error('API Error: ' + response.status + ' - ' + text);
-                });
-            }
-            
-            if (!response.ok) {
-                return response.text().then(function(text) {
-                    throw new Error('API Error: ' + response.status + ' - ' + text);
-                });
-            }
-            
-            return response.text().then(function(text) {
-                if (!text || text.trim() === '') return [];
-                try { return JSON.parse(text); }
-                catch (e) { console.error('JSON Parse Error:', text); return []; }
-            });
-        })
-        .catch(function(error) {
-            console.error('API Request Failed:', error);
-            throw error;
-        });
-}
+// ========== دوال API الأساسية باستخدام Supabase SDK ==========
 
-// ========== دوال YouTube ==========
-function extractYouTubeId(url) {
-    if (!url) return null;
-    
-    var patterns = [
-        /(?:youtube\.com\/watch\?v=)([^&]+)/,
-        /(?:youtu\.be\/)([^?]+)/,
-        /(?:youtube\.com\/embed\/)([^?]+)/,
-        /(?:youtube\.com\/shorts\/)([^?]+)/
-    ];
-    
-    for (var i = 0; i < patterns.length; i++) {
-        var match = url.match(patterns[i]);
-        if (match) return match[1];
-    }
-    return null;
-}
-
-function getYouTubeEmbedUrl(youtubeUrl, options) {
-    var videoId = extractYouTubeId(youtubeUrl);
-    if (!videoId) return null;
-    
-    // خيارات نظيفة: بدون إعلانات، بدون توصيات، بدون شعار
-    var params = {
-        modestbranding: 1,
-        rel: 0,
-        showinfo: 0,
-        controls: 1,
-        autoplay: options?.autoplay ? 1 : 0
-    };
-    
-    var queryString = Object.keys(params)
-        .map(function(key) { return key + '=' + params[key]; })
-        .join('&');
-    
-    return 'https://www.youtube.com/embed/' + videoId + '?' + queryString;
-}
-
-// ========== دوال الفيديوهات ==========
-function getVideos(category) {
-    var endpoint = 'videos?select=*&order=created_at.desc';
-    if (category && category !== 'الكل') {
-        endpoint += '&category=eq.' + encodeURIComponent(category);
-    }
-    return api(endpoint);
-}
-
-function getVideoById(id) {
-    return api('videos?id=eq.' + id).then(function(videos) {
-        return videos && videos.length > 0 ? videos[0] : null;
+// انتظار تهيئة Supabase
+function waitForSupabase() {
+    return new Promise(function(resolve) {
+        if (supabase) {
+            resolve(supabase);
+        } else {
+            var checkInterval = setInterval(function() {
+                if (supabase) {
+                    clearInterval(checkInterval);
+                    resolve(supabase);
+                }
+            }, 100);
+        }
     });
 }
 
-function addVideo(title, category, grade, url, fileId, userId, userName, playlistId, playlistName, thumbnail, sourceType) {
-    var videoData = {
+// ========== دوال الفيديوهات ==========
+async function getVideos(category) {
+    await waitForSupabase();
+    
+    let query = supabase
+        .from('videos')
+        .select('*')
+        .order('created_at', { ascending: false });
+    
+    if (category && category !== 'الكل') {
+        query = query.eq('category', category);
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+        console.error('Error fetching videos:', error);
+        throw new Error(error.message);
+    }
+    
+    return data || [];
+}
+
+async function getVideoById(id) {
+    await waitForSupabase();
+    
+    const { data, error } = await supabase
+        .from('videos')
+        .select('*')
+        .eq('id', id)
+        .single();
+    
+    if (error) {
+        console.error('Error fetching video:', error);
+        return null;
+    }
+    
+    return data;
+}
+
+async function addVideo(title, category, grade, url, fileId, userId, userName, playlistId, playlistName, thumbnail, sourceType) {
+    await waitForSupabase();
+    
+    const videoData = {
         title: title,
         category: category,
         grade: grade,
@@ -121,113 +79,340 @@ function addVideo(title, category, grade, url, fileId, userId, userName, playlis
         rating_count: 0
     };
     
-    return api('videos', 'POST', videoData).then(function(result) {
-        if (playlistId) {
-            return updatePlaylistVideoCount(playlistId).then(function() { return result; });
-        }
-        return result;
-    });
+    const { data, error } = await supabase
+        .from('videos')
+        .insert([videoData])
+        .select();
+    
+    if (error) {
+        console.error('Error adding video:', error);
+        throw new Error(error.message);
+    }
+    
+    // تحديث عدد فيديوهات القائمة إذا وجدت
+    if (playlistId) {
+        await updatePlaylistVideoCount(playlistId);
+    }
+    
+    return data?.[0] || null;
 }
 
-function updateVideoViews(id, views) {
-    return api('videos?id=eq.' + id, 'PATCH', { views: views });
+async function updateVideoViews(id, views) {
+    await waitForSupabase();
+    
+    const { error } = await supabase
+        .from('videos')
+        .update({ views: views })
+        .eq('id', id);
+    
+    if (error) {
+        console.error('Error updating views:', error);
+        throw new Error(error.message);
+    }
 }
 
-function updateVideoLikes(id, likes) {
-    return api('videos?id=eq.' + id, 'PATCH', { likes: likes });
+async function updateVideoLikes(id, likes) {
+    await waitForSupabase();
+    
+    const { error } = await supabase
+        .from('videos')
+        .update({ likes: likes })
+        .eq('id', id);
+    
+    if (error) {
+        console.error('Error updating likes:', error);
+        throw new Error(error.message);
+    }
 }
 
-function updateVideoRating(id, avgRating, ratingCount) {
-    return api('videos?id=eq.' + id, 'PATCH', { 
-        avg_rating: avgRating, 
-        rating_count: ratingCount 
-    });
+async function updateVideoRating(id, avgRating, ratingCount) {
+    await waitForSupabase();
+    
+    const { error } = await supabase
+        .from('videos')
+        .update({ 
+            avg_rating: avgRating, 
+            rating_count: ratingCount 
+        })
+        .eq('id', id);
+    
+    if (error) {
+        console.error('Error updating rating:', error);
+        throw new Error(error.message);
+    }
 }
 
-function deleteVideo(id) {
-    return api('videos?id=eq.' + id + '&select=playlist_id').then(function(videos) {
-        var playlistId = (videos && videos.length > 0) ? videos[0].playlist_id : null;
-        return api('videos?id=eq.' + id, 'DELETE').then(function() {
-            if (playlistId) return updatePlaylistVideoCount(playlistId);
-        });
-    });
+async function deleteVideo(id) {
+    await waitForSupabase();
+    
+    // الحصول على playlist_id قبل الحذف
+    const { data: video } = await supabase
+        .from('videos')
+        .select('playlist_id')
+        .eq('id', id)
+        .single();
+    
+    const { error } = await supabase
+        .from('videos')
+        .delete()
+        .eq('id', id);
+    
+    if (error) {
+        console.error('Error deleting video:', error);
+        throw new Error(error.message);
+    }
+    
+    if (video?.playlist_id) {
+        await updatePlaylistVideoCount(video.playlist_id);
+    }
 }
 
-// ========== دوال الأساتذة والطلاب ==========
-function getTeachers() {
-    return api('teachers?select=*&order=created_at.desc');
+// ========== دوال الأساتذة ==========
+async function getTeachers() {
+    await waitForSupabase();
+    
+    const { data, error } = await supabase
+        .from('teachers')
+        .select('*')
+        .order('created_at', { ascending: false });
+    
+    if (error) {
+        console.error('Error fetching teachers:', error);
+        throw new Error(error.message);
+    }
+    
+    return data || [];
 }
 
-function addTeacher(name, subject, secret) {
-    var user_id = 'teacher_' + Date.now();
-    return api('teachers', 'POST', {
-        name: name,
-        subject: subject,
-        secret: secret,
-        user_id: user_id
-    });
+async function addTeacher(name, subject, secret) {
+    await waitForSupabase();
+    
+    const user_id = 'teacher_' + Date.now();
+    
+    const { data, error } = await supabase
+        .from('teachers')
+        .insert([{
+            name: name,
+            subject: subject,
+            secret: secret,
+            user_id: user_id
+        }])
+        .select();
+    
+    if (error) {
+        console.error('Error adding teacher:', error);
+        throw new Error(error.message);
+    }
+    
+    return data?.[0] || null;
 }
 
-function addStudent(name, grade, secret) {
-    var user_id = 'student_' + Date.now();
-    return api('students', 'POST', {
-        name: name,
-        grade: grade,
-        secret: secret,
-        user_id: user_id
-    });
+async function deleteTeacher(id) {
+    await waitForSupabase();
+    
+    const { error } = await supabase
+        .from('teachers')
+        .delete()
+        .eq('id', id);
+    
+    if (error) {
+        console.error('Error deleting teacher:', error);
+        throw new Error(error.message);
+    }
 }
 
-function deleteTeacher(id) {
-    return api('teachers?id=eq.' + id, 'DELETE');
+// ========== دوال الطلاب ==========
+async function addStudent(name, grade, secret) {
+    await waitForSupabase();
+    
+    const user_id = 'student_' + Date.now();
+    
+    const { data, error } = await supabase
+        .from('students')
+        .insert([{
+            name: name,
+            grade: grade,
+            secret: secret,
+            user_id: user_id
+        }])
+        .select();
+    
+    if (error) {
+        console.error('Error adding student:', error);
+        throw new Error(error.message);
+    }
+    
+    return data?.[0] || null;
 }
 
-function deleteStudent(id) {
-    return api('students?id=eq.' + id, 'DELETE');
+async function deleteStudent(id) {
+    await waitForSupabase();
+    
+    const { error } = await supabase
+        .from('students')
+        .delete()
+        .eq('id', id);
+    
+    if (error) {
+        console.error('Error deleting student:', error);
+        throw new Error(error.message);
+    }
 }
 
 // ========== دوال التعليقات ==========
-function getComments(videoId) {
-    return api('comments?video_id=eq.' + videoId + '&order=created_at.desc');
+async function getComments(videoId) {
+    await waitForSupabase();
+    
+    const { data, error } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('video_id', videoId)
+        .order('created_at', { ascending: false });
+    
+    if (error) {
+        console.error('Error fetching comments:', error);
+        throw new Error(error.message);
+    }
+    
+    return data || [];
 }
 
-function addComment(videoId, userId, userName, text, rating) {
-    return api('comments', 'POST', {
-        video_id: videoId,
-        user_id: userId,
-        user_name: userName,
-        text: text,
-        rating: rating
-    });
+async function addComment(videoId, userId, userName, text, rating) {
+    await waitForSupabase();
+    
+    const { data, error } = await supabase
+        .from('comments')
+        .insert([{
+            video_id: videoId,
+            user_id: userId,
+            user_name: userName,
+            text: text,
+            rating: rating
+        }])
+        .select();
+    
+    if (error) {
+        console.error('Error adding comment:', error);
+        throw new Error(error.message);
+    }
+    
+    return data?.[0] || null;
 }
 
 // ========== دوال قوائم التشغيل ==========
-function getPlaylists(teacherId) {
-    return api('playlists?teacher_id=eq.' + teacherId + '&order=created_at.desc');
+async function getPlaylists(teacherId) {
+    await waitForSupabase();
+    
+    const { data, error } = await supabase
+        .from('playlists')
+        .select('*')
+        .eq('teacher_id', teacherId)
+        .order('created_at', { ascending: false });
+    
+    if (error) {
+        console.error('Error fetching playlists:', error);
+        throw new Error(error.message);
+    }
+    
+    return data || [];
 }
 
-function createPlaylist(name, teacherId, teacherName, subject) {
-    return api('playlists', 'POST', {
-        name: name,
-        teacher_id: teacherId,
-        teacher_name: teacherName,
-        subject: subject,
-        video_count: 0
-    });
+async function createPlaylist(name, teacherId, teacherName, subject) {
+    await waitForSupabase();
+    
+    const { data, error } = await supabase
+        .from('playlists')
+        .insert([{
+            name: name,
+            teacher_id: teacherId,
+            teacher_name: teacherName,
+            subject: subject,
+            video_count: 0
+        }])
+        .select();
+    
+    if (error) {
+        console.error('Error creating playlist:', error);
+        throw new Error(error.message);
+    }
+    
+    return data?.[0] || null;
 }
 
-function updatePlaylistVideoCount(playlistId) {
-    return api('videos?playlist_id=eq.' + playlistId + '&select=id').then(function(videos) {
-        var count = videos ? videos.length : 0;
-        return api('playlists?id=eq.' + playlistId, 'PATCH', { video_count: count });
-    });
+async function updatePlaylistVideoCount(playlistId) {
+    await waitForSupabase();
+    
+    // الحصول على عدد الفيديوهات في القائمة
+    const { count, error: countError } = await supabase
+        .from('videos')
+        .select('*', { count: 'exact', head: true })
+        .eq('playlist_id', playlistId);
+    
+    if (countError) {
+        console.error('Error counting videos:', countError);
+        return;
+    }
+    
+    const { error } = await supabase
+        .from('playlists')
+        .update({ video_count: count })
+        .eq('id', playlistId);
+    
+    if (error) {
+        console.error('Error updating playlist count:', error);
+    }
 }
 
-function deletePlaylist(id) {
-    return api('playlists?id=eq.' + id, 'DELETE');
+async function deletePlaylist(id) {
+    await waitForSupabase();
+    
+    const { error } = await supabase
+        .from('playlists')
+        .delete()
+        .eq('id', id);
+    
+    if (error) {
+        console.error('Error deleting playlist:', error);
+        throw new Error(error.message);
+    }
 }
 
-// ========== دوال الرفع إلى Telegram ==========
+// ========== دوال تسجيل الدخول ==========
+async function login(type, name, secret) {
+    await waitForSupabase();
+    
+    const table = type === 'teacher' ? 'teachers' : 'students';
+    
+    const { data, error } = await supabase
+        .from(table)
+        .select('*')
+        .eq('name', name)
+        .eq('secret', secret);
+    
+    if (error) {
+        console.error('Login error:', error);
+        throw new Error('خطأ في الاتصال');
+    }
+    
+    if (data && data.length > 0) {
+        const user = data[0];
+        const session = {
+            type: type,
+            name: user.name,
+            user_id: user.user_id,
+            id: user.id,
+            subject: user.subject || null,
+            grade: user.grade || null
+        };
+        saveSession(session);
+        return session;
+    } else {
+        throw new Error('بيانات الدخول غير صحيحة');
+    }
+}
+
+// ========== دوال الرفع إلى Telegram (نفسها بدون تغيير) ==========
+
 function formatFileSize(bytes) {
     if (bytes === 0) return '0 Bytes';
     var k = 1024;
